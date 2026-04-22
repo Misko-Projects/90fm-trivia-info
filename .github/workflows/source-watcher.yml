@@ -1,0 +1,251 @@
+name: Source watcher
+
+on:
+  schedule:
+    # 13:00 UTC = 08:00 Central (CDT) / 07:00 Central (CST)
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+    inputs:
+      force_resync:
+        description: "Force resync even if no changes"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      mode: ${{ steps.read-mode.outputs.mode }}
+      # changed_ids is safe to interpolate: ids are stable strings from
+      # lib/source-pages.ts that we control, never source-page text.
+      changed_ids: ${{ steps.read-mode.outputs.changed_ids }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Check source pages
+        run: pnpm watch:check
+
+      - name: Read mode from .changes.json
+        id: read-mode
+        run: |
+          mode=$(jq -r '.mode' .changes.json)
+          changed_ids=$(jq -r '[.changedPages // [] | .[] | .id] | join(",")' .changes.json)
+          {
+            echo "mode=$mode"
+            echo "changed_ids=$changed_ids"
+          } >> "$GITHUB_OUTPUT"
+          echo "Mode: $mode"
+          echo "Changed: $changed_ids"
+
+      - name: Upload changes artifact
+        if: steps.read-mode.outputs.mode != 'no-change'
+        uses: actions/upload-artifact@v4
+        with:
+          name: changes
+          path: .changes.json
+          retention-days: 30
+
+  resync-and-pr:
+    needs: check
+    if: needs.check.outputs.mode == 'pr'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Download changes
+        uses: actions/download-artifact@v4
+        with:
+          name: changes
+
+      - name: Run Claude resync
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: pnpm watch:resync
+
+      - name: Update snapshots (deterministic)
+        run: pnpm watch:update
+
+      - name: Verify build still passes
+        run: pnpm build
+
+      - name: Build PR body
+        id: pr-body
+        run: |
+          # Build the PR body server-side from the JSON file. We don't
+          # interpolate untrusted source-page text through YAML/shell.
+          {
+            echo "**Automated source sync**"
+            echo
+            echo "Changed pages on https://90fmtrivia.org/: \`$(jq -r '[.changedPages[].id] | join(", ")' .changes.json)\`"
+            echo
+            failed_count=$(jq -r '(.failedPages // []) | length' .changes.json)
+            if [ "$failed_count" != "0" ]; then
+              echo ":warning: **Pages that failed to fetch this run** (not blocking, but worth a glance):"
+              echo
+              jq -r '(.failedPages // []) | .[] | "- `\(.id)` — \(.status): \(.message)"' .changes.json
+              echo
+            fi
+            echo "This PR was authored by the Claude Agent SDK based on the diff at the top of \`.changes.json\` (attached as a workflow artifact). Snapshots were refreshed by the deterministic \`update-snapshots.ts\` script — Claude is not allowed to touch them directly."
+            echo
+            echo "**Review checklist**"
+            echo
+            echo "- [ ] Diff in \`content/data/**\` and \`content/*.mdx\` matches the upstream change"
+            echo "- [ ] No edits outside the listed target files"
+            echo "- [ ] CI is green"
+            echo "- [ ] Snapshot files in \`content/.source-snapshots/\` updated"
+          } > ${{ runner.temp }}/pr-body.md
+          echo "Wrote $(wc -l < ${{ runner.temp }}/pr-body.md) lines to ${{ runner.temp }}/pr-body.md"
+
+      - name: Open pull request
+        id: pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: source-sync/${{ github.run_id }}
+          base: main
+          commit-message: "chore(content): source sync (${{ needs.check.outputs.changed_ids }})"
+          title: "Source sync: ${{ needs.check.outputs.changed_ids }}"
+          body-path: ${{ runner.temp }}/pr-body.md
+          labels: |
+            content-sync
+            needs-review
+
+      - name: Notify Slack/Discord
+        if: steps.pr.outputs.pull-request-url != ''
+        env:
+          SYNC_WEBHOOK_URL: ${{ secrets.SYNC_WEBHOOK_URL }}
+        run: |
+          pnpm watch:notify pr "Source sync PR opened" \
+            "Pages changed: ${{ needs.check.outputs.changed_ids }}" \
+            "${{ steps.pr.outputs.pull-request-url }}"
+
+  open-issue:
+    needs: check
+    if: needs.check.outputs.mode == 'issue'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download changes artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: changes
+
+      - name: Open issue
+        id: issue
+        uses: actions/github-script@v7
+        env:
+          # Pass via env (not template-literal interpolation) so source-page
+          # text can never inject backticks or `${...}` into the JS context.
+          CHANGES_PATH: .changes.json
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const changes = JSON.parse(fs.readFileSync(process.env.CHANGES_PATH, 'utf8'));
+            const summary = String(changes.summary ?? "");
+            const ids = (changes.changedPages ?? []).map(p => p.id).join(", ");
+            const failedIds = (changes.failedPages ?? []).map(p => `${p.id} (${p.status})`).join(", ");
+            const reason = String(changes.reason ?? "unknown");
+            const body = [
+              "The daily source watcher exited in **issue mode** instead of opening a PR.",
+              "",
+              `**Reason:** \`${reason}\``,
+              `**Summary:** ${summary}`,
+              "",
+              `**Changed page ids:** ${ids ? `\`${ids}\`` : "(none)"}`,
+              `**Failed page ids:** ${failedIds ? `\`${failedIds}\`` : "(none)"}`,
+              "",
+              "Issue mode means one of:",
+              "- A tracked page on https://90fmtrivia.org/ failed to fetch (and there were no successful changes to ship anyway).",
+              "- More than 4 pages changed at once (likely a source restructure).",
+              "- The total diff exceeded the 20 KB cap.",
+              "",
+              "The full `.changes.json` is attached as a workflow artifact. Investigate, then either update `lib/source-pages.ts` if the upstream changed structure, or hand-edit the affected content files and re-run the watcher.",
+              "",
+              `Workflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            ].join("\n");
+            const today = new Date().toISOString().slice(0, 10);
+            const res = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Source watcher needs attention (${today})`,
+              body,
+              labels: ['source-watcher', 'needs-attention'],
+            });
+            core.setOutput('issue-url', res.data.html_url);
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Notify Slack/Discord
+        env:
+          SYNC_WEBHOOK_URL: ${{ secrets.SYNC_WEBHOOK_URL }}
+          ISSUE_URL: ${{ steps.issue.outputs.issue-url }}
+        run: |
+          # Read summary safely via jq instead of YAML interpolation, for the
+          # same script-injection reason as above.
+          summary=$(jq -r '.summary // ""' .changes.json)
+          pnpm watch:notify issue "Source watcher needs attention" "$summary" "$ISSUE_URL"
+
+  notify-failure:
+    needs: [check, resync-and-pr, open-issue]
+    if: always() && (needs.check.result == 'failure' || needs.resync-and-pr.result == 'failure' || needs.open-issue.result == 'failure')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Notify Slack/Discord on failure
+        env:
+          SYNC_WEBHOOK_URL: ${{ secrets.SYNC_WEBHOOK_URL }}
+        run: |
+          pnpm watch:notify failure "Source watcher run failed" \
+            "One or more jobs in the daily source watcher failed. Check the run for details." \
+            "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
