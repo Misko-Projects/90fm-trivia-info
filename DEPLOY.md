@@ -16,41 +16,18 @@ Estimated time: **30–45 minutes** the first time.
 
 ---
 
-## 1. Fix the placeholders in the repo
+## 1. Repo
 
-Two spots in the code refer to `@misko` or a placeholder GitHub URL and need your real values before you push.
-
-- [ ] **`.github/CODEOWNERS`** — replace every `@misko` with your actual GitHub handle (the one you want to be auto-requested as reviewer on source-sync PRs).
-- [ ] **`components/Footer.tsx`** — the "Source / GitHub" link in the bottom-right currently points at `https://github.com/`. Once you know the repo URL, update it. If you'd rather skip this, delete the whole `<p>Source: <a href="...">GitHub</a></p>` block.
+The repo is live at <https://github.com/Misko-Projects/90fm-trivia-info> with the initial scaffold already pushed. `.github/CODEOWNERS` is set to `@Misko19` so automated source-sync PRs will request review from that handle. If you ever fork this to a different owner, update those two references.
 
 ```sh
-# Quick sanity check after editing:
+# Quick sanity check anytime:
 pnpm typecheck && pnpm lint && pnpm build
 ```
 
 ---
 
-## 2. Push to GitHub
-
-The repo has been initialized locally but nothing is committed yet.
-
-```sh
-# From the repo root:
-git add -A
-git commit -m "Initial commit: 90fmtrivia.info v1"
-
-# Create the remote. Using the gh CLI:
-gh repo create 90fmtrivia-info --public --source=. --remote=origin --push
-
-# Or, if creating via the GitHub web UI, then:
-git branch -M main
-git remote add origin git@github.com:<your-handle>/90fmtrivia-info.git
-git push -u origin main
-```
-
----
-
-## 3. Connect the repo to Vercel
+## 2. Connect the repo to Vercel
 
 1. Go to <https://vercel.com/new>.
 2. Import the GitHub repo you just pushed.
@@ -65,7 +42,7 @@ The first deploy should finish in under a minute and give you a `*.vercel.app` U
 
 ---
 
-## 4. Point the domain
+## 3. Point the domain
 
 In Vercel → your project → **Settings → Domains**:
 
@@ -84,7 +61,7 @@ Verify:
 
 ---
 
-## 5. GitHub Actions secrets
+## 4. GitHub Actions secrets
 
 The source watcher needs two secrets. Repo → **Settings → Secrets and variables → Actions → New repository secret**:
 
@@ -99,7 +76,7 @@ The source watcher needs two secrets. Repo → **Settings → Secrets and variab
 
 ---
 
-## 6. Branch protection
+## 5. Branch protection
 
 Repo → **Settings → Branches → Add branch protection rule** for `main`:
 
@@ -112,7 +89,7 @@ The watcher relies on these checks passing before you merge its PRs. Without the
 
 ---
 
-## 7. Seed the source snapshots
+## 6. Seed the source snapshots
 
 **Already done locally.** The `content/.source-snapshots/` directory is committed with hashes + extracted text from the live source as of your first build. No further action needed.
 
@@ -126,7 +103,7 @@ git commit -m "chore(content): re-seed source snapshots"
 
 ---
 
-## 8. First watcher run
+## 7. First watcher run
 
 The watcher is scheduled for 13:00 UTC daily. To validate it works *before* waiting a day, trigger it manually:
 
@@ -140,7 +117,7 @@ To force a resync for testing, locally edit one of the `.json` snapshot files (c
 
 ---
 
-## 9. Ongoing operations
+## 8. Ongoing operations
 
 Once everything's live:
 
@@ -150,7 +127,7 @@ Once everything's live:
 
 ---
 
-## 10. Quick reference
+## 9. Quick reference
 
 ```sh
 # Local dev

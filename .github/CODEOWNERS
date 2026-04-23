@@ -1,10 +1,10 @@
 # Catch-all — every PR notifies the owner.
-*       @misko
+*       @Misko19
 
 # Anything the source-watcher might touch. Routing these explicitly so
 # automated source-sync PRs always request review from a human.
-/content/                       @misko
-/lib/source-pages.ts            @misko
-/lib/snapshots.ts               @misko
-/scripts/                       @misko
-/.github/workflows/             @misko
+/content/                       @Misko19
+/lib/source-pages.ts            @Misko19
+/lib/snapshots.ts               @Misko19
+/scripts/                       @Misko19
+/.github/workflows/             @Misko19
