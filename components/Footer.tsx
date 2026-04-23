@@ -147,7 +147,9 @@ export function Footer() {
           <p>
             Source:{" "}
             <a
-              href="https://github.com/"
+              href="https://github.com/Misko-Projects/90fm-trivia-info"
+              target="_blank"
+              rel="noopener noreferrer"
               className="underline decoration-dotted underline-offset-2 hover:text-maroon"
             >
               GitHub
