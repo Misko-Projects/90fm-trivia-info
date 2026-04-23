@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
 import { Section } from "@/components/Section";
 import { Prose } from "@/components/Prose";
+import { YouTubeEmbed } from "@/components/YouTubeEmbed";
 import { getContact, getCurrentContest } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -22,6 +23,18 @@ export default function AboutPage() {
         title="The World’s Largest Trivia Contest"
         lede="54 hours. 8 questions an hour. A parade, a scavenger hunt, running questions, three rounds of music snippets. Once a year. Since 1969."
       />
+
+      <Section
+        eyebrow="Watch"
+        title="A six-minute introduction"
+        description="If you’ve never heard of the contest, this is the fastest way in."
+      >
+        <YouTubeEmbed
+          videoId="C-IyBRXaUls"
+          title="90FM Trivia Contest — mini documentary"
+          caption="Mini-documentary on the World’s Largest Trivia Contest."
+        />
+      </Section>
 
       <Section>
         <Prose>
