@@ -6,13 +6,14 @@ import { Section } from "@/components/Section";
 import { getArchiveYear, getArchiveYears } from "@/lib/content";
 
 type Params = { year: string };
+type ArchiveYearPageProps = { params: Promise<Params> };
 
 export function generateStaticParams(): Params[] {
   return getArchiveYears().map((y) => ({ year: String(y.year) }));
 }
 
 export async function generateMetadata(
-  props: PageProps<"/archive/[year]">,
+  props: ArchiveYearPageProps,
 ): Promise<Metadata> {
   const { year } = await props.params;
   const data = getArchiveYear(Number(year));
@@ -31,7 +32,7 @@ const nextYear = (years: number[], year: number) =>
   years.find((y) => y > year);
 
 export default async function ArchiveYearPage(
-  props: PageProps<"/archive/[year]">,
+  props: ArchiveYearPageProps,
 ) {
   const { year: yearStr } = await props.params;
   const year = Number(yearStr);
