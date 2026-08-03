@@ -23,6 +23,7 @@ import y2022 from "./2022";
 import y2023 from "./2023";
 import y2024 from "./2024";
 import y2025 from "./2025";
+import y2026 from "./2026";
 
 /** Static registry of all per-year archive entries.
  *  Static imports keep Turbopack happy and let `getArchiveYear` stay sync. */
@@ -51,4 +52,5 @@ export const archiveByYear: Record<number, ArchiveYear> = {
   2023: y2023,
   2024: y2024,
   2025: y2025,
+  2026: y2026,
 };
