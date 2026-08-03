@@ -30,4 +30,5 @@ export const archiveYears: ArchiveIndexEntry[] = [
   { year: 2023, hasDetail: true },
   { year: 2024, hasDetail: true },
   { year: 2025, hasDetail: true },
+  { year: 2026, hasDetail: true },
 ];
