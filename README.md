@@ -40,7 +40,7 @@ Tracked source pages and their cheerio selectors live in [`lib/source-pages.ts`]
 app/                       # Next.js App Router (routes under (site) group)
 components/                # UI components
 content/data/              # Structured content (typed TS files)
-content/data/archive/      # Per-year contest data (25 files, 1997-2026)
+content/data/archive/      # Per-year contest data (30 files, 1997-2026)
 content/.source-snapshots/ # Hashes + extracted text of upstream pages — DO NOT hand-edit
 lib/                       # Content accessors, types, source-pages config, snapshots logic
 scripts/                   # Source watcher scripts (run by GH Actions)
