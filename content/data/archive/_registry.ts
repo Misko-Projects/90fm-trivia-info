@@ -3,6 +3,9 @@ import y1997 from "./1997";
 import y1998 from "./1998";
 import y1999 from "./1999";
 import y2000 from "./2000";
+import y2001 from "./2001";
+import y2002 from "./2002";
+import y2003 from "./2003";
 import y2004 from "./2004";
 import y2005 from "./2005";
 import y2006 from "./2006";
@@ -18,6 +21,8 @@ import y2015 from "./2015";
 import y2016 from "./2016";
 import y2017 from "./2017";
 import y2018 from "./2018";
+import y2019 from "./2019";
+import y2020 from "./2020";
 import y2021 from "./2021";
 import y2022 from "./2022";
 import y2023 from "./2023";
@@ -32,6 +37,9 @@ export const archiveByYear: Record<number, ArchiveYear> = {
   1998: y1998,
   1999: y1999,
   2000: y2000,
+  2001: y2001,
+  2002: y2002,
+  2003: y2003,
   2004: y2004,
   2005: y2005,
   2006: y2006,
@@ -47,6 +55,8 @@ export const archiveByYear: Record<number, ArchiveYear> = {
   2016: y2016,
   2017: y2017,
   2018: y2018,
+  2019: y2019,
+  2020: y2020,
   2021: y2021,
   2022: y2022,
   2023: y2023,

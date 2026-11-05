@@ -26,7 +26,7 @@ export default function ArchivePage() {
       <PageHero
         eyebrow="Archive"
         title="Past contests"
-        lede="Themes, winners, and top finishers from every published contest. Some years have full standings, some only have winners. The 2020 contest was famously not held."
+        lede="Themes, winners, and top finishers from every published contest. Some years have full standings, some only have winners. In 2020 the April contest was cancelled, and 90FM ran an online Experiment in Trivia that October."
       />
 
       <Section>
