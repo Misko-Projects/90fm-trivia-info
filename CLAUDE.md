@@ -44,7 +44,7 @@ Pages and components **never import `content/data/**` directly**. They go throug
 The most complex piece of the project. Runs daily via GitHub Actions. **The three scripts are deliberately separated; don't merge their concerns:**
 
 1. `scripts/check-source.ts` — fetches each page in `lib/source-pages.ts`, extracts content via page-specific cheerio selectors (`lib/snapshots.ts`), diffs against the stored snapshot, writes `.changes.json` declaring mode: `no-change` | `pr` | `issue`. Issue mode triggers on fetch failures with no successful changes, >4 changed pages, or >20KB total diff.
-2. `scripts/resync-content.ts` — only runs in `pr` mode. Invokes the Claude Agent SDK with `Read`+`Edit` only, a `canUseTool` guard that restricts edits to `content/data/**` and `content/*.mdx`, `maxTurns: 10`, and a 10-minute abort. Source text is wrapped in `<untrusted-source>` tags in the prompt (prompt-injection defense).
+2. `scripts/resync-content.ts` — only runs in `pr` mode. Invokes the Claude Agent SDK (model pinned to `claude-sonnet-5-5`) with `Read`+`Edit` only, a `PreToolUse` hook that restricts edits to `content/data/**` and `content/*.mdx`, `maxTurns: 10`, and a 10-minute abort. The guard must stay a hook: under `bypassPermissions` the SDK never calls `canUseTool`. Source text is wrapped in `<untrusted-source>` tags in the prompt (prompt-injection defense).
 3. `scripts/update-snapshots.ts` — deterministically writes new snapshot files from the `.changes.json` blob. **This must run AFTER the agent finishes**, never before, and never via the agent. That ordering is what prevents silent-drift (a bad Claude edit getting locked in by a refreshed snapshot).
 
 ### Dark mode

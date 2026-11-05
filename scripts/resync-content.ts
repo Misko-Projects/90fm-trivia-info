@@ -11,12 +11,17 @@
  *      arbitrary files), no WebFetch (so it can't reach the open internet).
  *   2. `disallowedTools` listing every other built-in tool name we know of —
  *      belt and suspenders against future SDK additions defaulting on.
- *   3. `canUseTool` callback that explicitly denies any Edit whose target
- *      file isn't in the per-page `targets` list AND blocks ANY edit to
- *      `content/.source-snapshots/`. This is the load-bearing check.
+ *   3. A `PreToolUse` hook that denies any tool other than Read/Edit, any
+ *      Edit whose target file isn't in the per-page `targets` list, and ANY
+ *      edit to `content/.source-snapshots/`. This is the load-bearing check.
+ *      It must be a hook, not `canUseTool`: under `bypassPermissions` the
+ *      SDK auto-approves tool calls before `canUseTool` is ever consulted.
  *   4. `maxTurns: 10` and a 10-minute wall-clock AbortController timeout.
  *   5. The source content is fenced inside an `<untrusted-source>` XML tag.
  *      The system prompt repeatedly identifies it as untrusted data.
+ *   6. `settingSources: []` and `strictMcpConfig: true` — the agent does not
+ *      load user/project settings, plugins, or MCP servers from the machine
+ *      it runs on.
  *
  * Snapshots are NOT updated by this script — that happens in
  * update-snapshots.ts after Claude finishes. This guarantees the watcher
@@ -28,7 +33,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   query,
-  type CanUseTool,
+  type HookCallback,
   type SDKMessage,
 } from "@anthropic-ai/claude-agent-sdk";
 
@@ -166,44 +171,52 @@ async function main() {
     "NotebookEdit",
   ]);
 
-  const canUseTool: CanUseTool = async (toolName, input) => {
+  /** Returns the reason a tool call must be refused, or null if it is allowed. */
+  const denialReason = (toolName: string, input: unknown): string | null => {
     if (!ALLOWED_TOOLS.has(toolName)) {
-      return {
-        behavior: "deny",
-        message: `Tool "${toolName}" is not permitted in this resync context.`,
-        interrupt: false,
-      };
+      return `Tool "${toolName}" is not permitted in this resync context.`;
     }
     // Path restriction applies to any filesystem-mutating tool. The
     // ALLOWED_TOOLS check above currently means only Edit reaches this
     // branch, but if Write is ever added to ALLOWED_TOOLS in the future,
     // this guard still catches it.
     if (PATH_RESTRICTED_TOOLS.has(toolName)) {
-      const filePath = (input as { file_path?: string }).file_path;
-      if (!filePath) {
-        return {
-          behavior: "deny",
-          message: `${toolName} requires a file_path.`,
-          interrupt: false,
-        };
-      }
+      const filePath = (input as { file_path?: string } | null)?.file_path;
+      if (!filePath) return `${toolName} requires a file_path.`;
       const rel = relToRepo(filePath);
       if (!isPathEditable(rel, allowedTargets)) {
-        return {
-          behavior: "deny",
-          message: `${toolName} denied: ${rel} is not an allowed target file. Allowed targets for this resync: ${[...allowedTargets].join(", ")}.`,
-          interrupt: false,
-        };
+        return `${toolName} denied: ${rel} is not an allowed target file. Allowed targets for this resync: ${[...allowedTargets].join(", ")}.`;
       }
     }
-    return { behavior: "allow", updatedInput: input };
+    return null;
+  };
+
+  // The enforcing gate. PreToolUse hooks run before every tool call in every
+  // permission mode, including `bypassPermissions`.
+  let callsBlocked = 0;
+  const preToolUseGuard: HookCallback = async (input) => {
+    if (input.hook_event_name !== "PreToolUse") return {};
+    const reason = denialReason(input.tool_name, input.tool_input);
+    if (!reason) return {};
+    callsBlocked++;
+    console.log(`✗ blocked: ${reason}`);
+    return {
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: reason,
+      },
+    };
   };
 
   const result = query({
     prompt: buildPrompt(changes.changedPages),
     options: {
       cwd: repoRoot,
-      model: "sonnet",
+      // Pinned to an explicit model ID. The bare "sonnet" alias resolves to
+      // whatever the installed SDK considers current, so it moves silently
+      // on SDK upgrades.
+      model: "claude-sonnet-5-5",
       maxTurns: MAX_TURNS,
       tools: ["Read", "Edit"],
       disallowedTools: [
@@ -217,7 +230,10 @@ async function main() {
       ],
       permissionMode: "bypassPermissions",
       allowDangerouslySkipPermissions: true,
-      canUseTool,
+      hooks: { PreToolUse: [{ hooks: [preToolUseGuard] }] },
+      // Isolation: ignore settings, plugins and MCP servers on the host.
+      settingSources: [],
+      strictMcpConfig: true,
       abortController,
       includePartialMessages: false,
       systemPrompt:
@@ -244,7 +260,7 @@ async function main() {
   clearTimeout(timeout);
 
   console.log(
-    `\nResync complete. Edits attempted: ${editsAttempted}. ${lastResult ? `Status: ${lastResult.subtype}` : ""}`,
+    `\nResync complete. Edits attempted: ${editsAttempted}. Calls blocked: ${callsBlocked}. ${lastResult ? `Status: ${lastResult.subtype}` : ""}`,
   );
 
   if (lastResult && lastResult.subtype !== "success") {
