@@ -3,9 +3,12 @@ import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
 import { Section } from "@/components/Section";
 import {
+  getContestDates,
   getCurrentContest,
+  getFutureContests,
   getHeadlineSchedule,
   getMusicSnippetRounds,
+  isHeadlineScheduleCurrent,
 } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -45,13 +48,19 @@ const typeLabel: Record<string, string> = {
 
 export default function SchedulePage() {
   const contest = getCurrentContest();
+  const dates = getContestDates();
   const events = getHeadlineSchedule();
+  const scheduleIsCurrent = isHeadlineScheduleCurrent();
+  const future = getFutureContests();
   const musicRounds = getMusicSnippetRounds();
 
-  // Group events by day
+  // Group events by day. A schedule left over from the previous contest gets
+  // the year in its day headings so it cannot be mistaken for this one.
   const byDay = new Map<string, typeof events>();
   for (const ev of events) {
-    const day = formatDay(ev.at);
+    const day = scheduleIsCurrent
+      ? formatDay(ev.at)
+      : `${formatDay(ev.at)}, ${ev.at.slice(0, 4)}`;
     if (!byDay.has(day)) byDay.set(day, []);
     byDay.get(day)!.push(ev);
   }
@@ -59,12 +68,32 @@ export default function SchedulePage() {
   return (
     <>
       <PageHero
-        eyebrow={`Trivia ${contest.number}`}
-        title={`${contest.theme} schedule`}
+        eyebrow={contest.theme ? `Trivia ${contest.number}` : "Contest weekend"}
+        title={`${contest.theme ?? `Trivia ${contest.number}`} schedule`}
         lede="The signature events. The 54 regular hours run continuously between them."
       />
 
       <Section>
+        {scheduleIsCurrent ? null : (
+          <div className="mb-12 rounded-[var(--radius-card)] border border-amber bg-amber/15 p-6 shadow-paper sm:p-8">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
+              The Trivia {contest.number} schedule has not been announced yet
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-ink-soft">
+              The contest runs{" "}
+              <strong className="text-ink">{dates.range}</strong>, starting{" "}
+              {dates.startDay} at {dates.startTime}. Times for the parade,
+              running questions and the Trivia Stone are published closer to
+              contest week.
+            </p>
+            {events.length > 0 ? (
+              <p className="mt-3 text-sm text-ink-mute">
+                Below is the schedule from the previous contest, for a sense of
+                how the weekend usually goes. These dates are in the past.
+              </p>
+            ) : null}
+          </div>
+        )}
         <div className="space-y-12">
           {[...byDay.entries()].map(([day, dayEvents]) => (
             <div key={day}>
@@ -147,10 +176,22 @@ export default function SchedulePage() {
       </Section>
 
       <Section eyebrow="Looking ahead" title="Future contests">
-        <p className="text-base text-ink-soft">
-          Trivia 57 is scheduled for{" "}
-          <strong className="text-ink">April 9–11, 2027</strong>.
-        </p>
+        {future.length > 0 ? (
+          future.map((f) => (
+            <p key={f.year} className="text-base text-ink-soft">
+              {f.number ? `Trivia ${f.number}` : `The ${f.year} contest`} is
+              scheduled for{" "}
+              <strong className="text-ink">
+                {f.dates}, {f.year}
+              </strong>
+              .
+            </p>
+          ))
+        ) : (
+          <p className="text-base text-ink-soft">
+            No dates beyond Trivia {contest.number} have been announced.
+          </p>
+        )}
         <p className="mt-3 text-sm text-ink-mute">
           For year-by-year history, see the{" "}
           <Link

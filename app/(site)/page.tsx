@@ -4,6 +4,8 @@ import { CountdownToContest } from "@/components/CountdownToContest";
 import { OnAirBadge } from "@/components/OnAirBadge";
 import {
   getContact,
+  getContestDates,
+  getContestLabel,
   getCurrentContest,
   getFutureContests,
   getRegistrationCosts,
@@ -12,19 +14,12 @@ import {
 
 export const metadata: Metadata = {
   title: "90FM Trivia — World's Largest Trivia Contest",
-  description:
-    "An unofficial, modern guide to the 54-hour annual trivia contest run by 90FM in Stevens Point, WI — Trivia 56: The Love Contest, April 17–19, 2026.",
+  description: `An unofficial, modern guide to the 54-hour annual trivia contest run by 90FM in Stevens Point, WI — ${getContestLabel()}, ${getContestDates().range}.`,
 };
-
-const contestStartFormatted = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    timeZone: "America/Chicago",
-  });
 
 export default function Home() {
   const contest = getCurrentContest();
+  const dates = getContestDates();
   const sponsors = getSponsors();
   const future = getFutureContests();
   const cost = getRegistrationCosts();
@@ -39,7 +34,9 @@ export default function Home() {
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-maroon">
-                Trivia {contest.number}
+                {contest.theme
+                  ? `Trivia ${contest.number}`
+                  : "Theme to be announced"}
               </p>
               <OnAirBadge
                 startsAt={contest.startsAt}
@@ -48,14 +45,12 @@ export default function Home() {
               />
             </div>
             <h1 className="mt-4 font-display text-[clamp(2.75rem,8vw,5.5rem)] font-semibold leading-[0.95] tracking-tight text-ink">
-              The Love
-              <br />
-              Contest
+              {contest.theme ?? `Trivia ${contest.number}`}
             </h1>
             <p className="mt-6 max-w-xl font-display text-xl leading-snug text-ink-soft sm:text-2xl">
               <strong className="text-ink">54 hours of trivia.</strong>{" "}
-              {contestStartFormatted(contest.startsAt)} – April 19, 2026, on
-              89.9 FM in Stevens Point — or anywhere with a phone.
+              {dates.range}, on 89.9 FM in Stevens Point — or anywhere with a
+              phone.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -188,23 +183,27 @@ export default function Home() {
 
       {/* Future + donate strip */}
       <section className="px-4 py-16 sm:px-6">
-        <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-2">
-          <div className="rounded-[var(--radius-card)] border border-rule bg-paper p-6 shadow-paper sm:p-8">
-            <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-mute">
-              Looking ahead
-            </p>
-            <h3 className="mt-2 font-display text-2xl font-semibold text-ink">
-              Future contests
-            </h3>
-            <ul className="mt-4 space-y-2 font-mono text-base text-ink-soft">
-              {future.map((f) => (
-                <li key={f.year} className="flex justify-between border-b border-rule py-2 last:border-b-0">
-                  <span>{f.dates}, {f.year}</span>
-                  {f.number ? <span className="text-maroon">Trivia {f.number}</span> : null}
-                </li>
-              ))}
-            </ul>
-          </div>
+        <div
+          className={`mx-auto grid max-w-6xl gap-6 ${future.length > 0 ? "lg:grid-cols-2" : ""}`}
+        >
+          {future.length > 0 ? (
+            <div className="rounded-[var(--radius-card)] border border-rule bg-paper p-6 shadow-paper sm:p-8">
+              <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-mute">
+                Looking ahead
+              </p>
+              <h3 className="mt-2 font-display text-2xl font-semibold text-ink">
+                Future contests
+              </h3>
+              <ul className="mt-4 space-y-2 font-mono text-base text-ink-soft">
+                {future.map((f) => (
+                  <li key={f.year} className="flex justify-between border-b border-rule py-2 last:border-b-0">
+                    <span>{f.dates}, {f.year}</span>
+                    {f.number ? <span className="text-maroon">Trivia {f.number}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <div className="rounded-[var(--radius-card)] border border-amber bg-amber/15 p-6 shadow-paper sm:p-8">
             <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-amber-deep">
               Even if you can&rsquo;t play

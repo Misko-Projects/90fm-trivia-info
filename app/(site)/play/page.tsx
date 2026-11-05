@@ -128,18 +128,43 @@ export default function PlayPage() {
               </li>
               <li>
                 <span className="font-mono text-sm text-maroon">03</span>{" "}
-                Postmark by{" "}
-                <strong>{friendlyDate(contest.mailRegistrationPostmarkBy)}</strong>
-                . Materials must arrive by{" "}
-                <strong>{friendlyDate(contest.mailRegistrationArriveBy)}</strong>
-                .
+                {contest.mailRegistrationPostmarkBy &&
+                contest.mailRegistrationArriveBy ? (
+                  <>
+                    Postmark by{" "}
+                    <strong>
+                      {friendlyDate(contest.mailRegistrationPostmarkBy)}
+                    </strong>
+                    . Materials must arrive by{" "}
+                    <strong>
+                      {friendlyDate(contest.mailRegistrationArriveBy)}
+                    </strong>
+                    .
+                  </>
+                ) : (
+                  <>
+                    The postmark and arrival deadlines for Trivia{" "}
+                    {contest.number} have{" "}
+                    <strong>not been announced yet</strong>.
+                  </>
+                )}
               </li>
               <li>
                 <span className="font-mono text-sm text-maroon">04</span>{" "}
-                Packets ship{" "}
-                <strong>{friendlyDate(contest.packetShipsOn)}</strong> with your
-                team ID, the New Trivia Times, and the phone number to dial
-                during the contest.
+                {contest.packetShipsOn ? (
+                  <>
+                    Packets ship{" "}
+                    <strong>{friendlyDate(contest.packetShipsOn)}</strong> with
+                    your team ID, the New Trivia Times, and the phone number to
+                    dial during the contest.
+                  </>
+                ) : (
+                  <>
+                    You are then sent a packet with your team ID, the New
+                    Trivia Times, and the phone number to dial during the
+                    contest. The ship date has not been announced yet.
+                  </>
+                )}
               </li>
               <li>
                 <span className="font-mono text-sm text-maroon">05</span> Tune

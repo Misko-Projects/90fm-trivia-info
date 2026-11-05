@@ -4,7 +4,11 @@ import { PageHero } from "@/components/PageHero";
 import { Section } from "@/components/Section";
 import { Prose } from "@/components/Prose";
 import { YouTubeEmbed } from "@/components/YouTubeEmbed";
-import { getContact, getCurrentContest } from "@/lib/content";
+import {
+  getContact,
+  getContestDates,
+  getCurrentContest,
+} from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "About",
@@ -15,6 +19,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   const contact = getContact();
   const contest = getCurrentContest();
+  const dates = getContestDates();
 
   return (
     <>
@@ -65,7 +70,7 @@ export default function AboutPage() {
 
           <h2 id="this-year">{contest.title}</h2>
           <p>
-            This year&rsquo;s contest runs <strong>April 17–19, 2026</strong>.
+            The contest runs <strong>{dates.range}</strong>.
             See the <Link href="/schedule">Schedule</Link> for the headline
             events; <Link href="/play">Play</Link> for how to register a team
             from anywhere in the world; <Link href="/listen">Listen</Link> for
