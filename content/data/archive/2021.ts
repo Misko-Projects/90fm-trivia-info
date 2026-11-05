@@ -21,7 +21,7 @@ const archive: ArchiveYear = {
     { rank: 10, team: "Late Night With Bob Keeshan", score: 12255 },
   ],
   notes:
-    "Area 51-themed contest. No Trivia 50 took place in 2020 due to the COVID-19 pandemic, so this was the first contest in two years.",
+    "Area 51-themed contest. Trivia 51 was originally scheduled for April 2020 and was postponed to 2021 because of the COVID-19 pandemic, making this the first official contest since Trivia 50 in 2019. 90FM ran an unofficial online Experiment in Trivia in October 2020 in between.",
   sourceUrl: "https://90fmtrivia.org/TriviaScores2021/Trivia%2051%20Scores!.html",
 };
 

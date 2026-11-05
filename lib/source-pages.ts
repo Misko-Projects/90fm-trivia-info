@@ -67,7 +67,8 @@ export const sourcePages: SourcePage[] = [
     url: "https://90fmtrivia.org/vault.html",
     selector: "body",
     targets: ["content/data/archive.ts"],
-    description: "Index of past-contest score pages by year.",
+    description:
+      "Index of past-contest score pages by year. The target file is deliberately a SUPERSET of this page: 2001-2003, 2019 and 2020 are not linked from the vault and were added from other sources. Only ADD years that newly appear here; never remove a year from the target because this page does not list it.",
   },
   {
     id: "future",

@@ -21,7 +21,7 @@ const archive: ArchiveYear = {
     { rank: 10, team: "MUTATED MEMBERS", score: 6435 },
   ],
   notes:
-    "Final standings timestamped 00:14:10 Mon, Apr 22, 2002 (end of hour 54). The source page gives the winner's name only as \"N\" (likely Network, which won in 2001 and 2003, but the page does not say). From the Wayback Machine capture of the old contest site at momsfamilies.com/trivia.",
+    "Final standings timestamped 00:14:10 Mon, Apr 22, 2002 (end of hour 54). The winner is listed as \"N\", which is the name Network played under this year. From the Wayback Machine capture of the old contest site at momsfamilies.com/trivia.",
   sourceUrl:
     "https://web.archive.org/web/20030204091300/http://momsfamilies.com/trivia/scores33.htm",
 };

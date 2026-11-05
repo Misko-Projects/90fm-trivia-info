@@ -107,6 +107,8 @@ export type ArchiveYear = {
   contestNumber?: number;
   title?: string;
   theme?: string;
+  /** ISO dates. By convention `end` is the Monday the final standings were
+   *  posted: the contest runs through midnight Sunday. */
   dates?: { start?: string; end?: string };
   totalTeams?: number;
   winner?: string;
