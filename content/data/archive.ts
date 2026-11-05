@@ -5,7 +5,11 @@ import type { ArchiveIndexEntry } from "@/lib/types";
  *  etc.) lives in archive/<year>.ts. 2001-2003 are not on the vault (the
  *  contest site was at momsfamilies.com/trivia then), so they come from the
  *  Wayback Machine; 2019 and 2020 are on 90fmtrivia.org but not linked from
- *  the vault. 2020 was the October online "Experiment in Trivia". */
+ *  the vault. 2020 is the unofficial October online "Experiment in Trivia";
+ *  the official April 2020 contest (Trivia 51) was postponed to 2021.
+ *
+ *  This list is deliberately a superset of the vault. Do NOT remove a year
+ *  just because vault.html does not link it. */
 export const archiveYears: ArchiveIndexEntry[] = [
   { year: 1997, hasDetail: true },
   { year: 1998, hasDetail: true },

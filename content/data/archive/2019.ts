@@ -4,7 +4,9 @@ const archive: ArchiveYear = {
   year: 2019,
   contestNumber: 50,
   title: "Trivia Five-0",
-  dates: { start: "2019-04-12", end: "2019-04-14" },
+  theme: "Trivia Five-0",
+  dates: { start: "2019-04-12", end: "2019-04-15" },
+  totalTeams: 341,
   winner: "FESTIVUS FOR THE REST OF US",
   topFinishers: [
     { rank: 1, team: "FESTIVUS FOR THE REST OF US", score: 19760 },

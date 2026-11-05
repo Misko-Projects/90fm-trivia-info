@@ -5,7 +5,7 @@ const archive: ArchiveYear = {
   contestNumber: 32,
   title: "Trivia 32 - Old Days",
   theme: "Old Days",
-  dates: { start: "2001-04-20", end: "2001-04-22" },
+  dates: { start: "2001-04-20", end: "2001-04-23" },
   totalTeams: 461,
   winner: "NETWORK 2001: TIME AFTER TIM",
   topFinishers: [
@@ -21,7 +21,7 @@ const archive: ArchiveYear = {
     { rank: 10, team: "BASEMENTALITY 2001:TRIVIA OZ DISEASE", score: 6655 },
   ],
   notes:
-    "Final (hour 54) scores. Not linked from 90fmtrivia.org: in 2001-2003 the contest site was hosted at momsfamilies.com/trivia, so this comes from the Wayback Machine capture of 1 May 2001.",
+    "Final (hour 54) scores. The winner's name is cut off on the source page (\"TIME AFTER TIM\") and is kept as printed. Not linked from 90fmtrivia.org: in 2001-2003 the contest site was hosted at momsfamilies.com/trivia, so this comes from the Wayback Machine capture of 1 May 2001.",
   sourceUrl:
     "https://web.archive.org/web/20010501001918/http://momsfamilies.com/trivia/middleframe_2.htm",
 };

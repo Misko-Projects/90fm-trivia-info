@@ -21,7 +21,7 @@ const archive: ArchiveYear = {
     { rank: 10, team: "FRANKLIN STREET BURNOUTS-YEAR 30", score: 6540 },
   ],
   notes:
-    "Final standings timestamped 00:33:23 Mon, Apr 14, 2003 (end of hour 54). From the Wayback Machine capture of the old contest site at momsfamilies.com/trivia. The top 5 and the 459-team count match the UWSP Pointer of April 17, 2003.",
+    "Final standings timestamped 00:33:23 Mon, Apr 14, 2003 (end of hour 54). From the Wayback Machine capture of the old contest site at momsfamilies.com/trivia. The only surviving capture of these standings is a page template file, so the source link opens as plain text rather than a rendered page. The top 5 and the 459-team count match the UWSP Pointer of April 17, 2003.",
   sourceUrl:
     "https://web.archive.org/web/20030502062958/http://www.momsfamilies.com/trivia/Templates/scores33.dwt",
 };
