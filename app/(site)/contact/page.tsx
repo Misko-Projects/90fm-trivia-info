@@ -106,19 +106,25 @@ export default function ContactPage() {
         <div className="rounded-[var(--radius-card)] border border-rule bg-paper p-6 shadow-paper sm:p-8">
           <p className="text-base leading-relaxed text-ink-soft">
             If anything on{" "}
-            <strong className="text-ink">90fmtrivia.info</strong> is wrong,
-            outdated, or contradicts the official site, send an email and
-            we&rsquo;ll fix it fast. Tell us the page URL and what&rsquo;s
-            wrong.
+            <strong className="text-ink">90fmtrivia.info</strong>{" "}
+            is wrong, outdated, or contradicts the official site, open an issue
+            on GitHub and we&rsquo;ll fix it fast. Tell us the page URL and
+            what&rsquo;s wrong.
           </p>
           <div className="mt-6">
             <a
-              href={`mailto:hello@90fmtrivia.info?subject=Correction%3A%20`}
+              href="https://github.com/Misko-Projects/90fm-trivia-info/issues/new?template=correction.yml"
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex items-center rounded-full bg-maroon px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.12em] text-paper shadow-paper transition-colors hover:bg-maroon-deep"
             >
-              Email a correction
+              Report it on GitHub
             </a>
           </div>
+          <p className="mt-4 text-sm text-ink-mute">
+            Opens a short form on GitHub. You&rsquo;ll need a free GitHub
+            account.
+          </p>
         </div>
       </Section>
 
