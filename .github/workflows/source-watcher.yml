@@ -61,6 +61,10 @@ jobs:
         with:
           name: changes
           path: .changes.json
+          # .changes.json is a dotfile. upload-artifact skips hidden files by
+          # default, which left the later jobs with no artifact to download.
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 30
 
   resync-and-pr:
@@ -129,7 +133,7 @@ jobs:
 
       - name: Open pull request
         id: pr
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: source-sync/${{ github.run_id }}

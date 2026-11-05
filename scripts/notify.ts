@@ -1,7 +1,8 @@
 /**
- * Posts a Slack-formatted notification to SYNC_WEBHOOK_URL.
- * Slack and Discord both accept Slack-style payloads (Discord supports it
- * when the webhook URL ends with `/slack`, otherwise raw JSON works too).
+ * Posts a notification to SYNC_WEBHOOK_URL, which may be a Slack or a
+ * Discord incoming webhook. The payload carries both shapes: Slack (and
+ * Discord's `/slack` compatibility endpoint) reads `text`; Discord's native
+ * endpoint ignores `text` and rejects the message as empty without `content`.
  *
  * Usage from GH Actions:
  *   tsx scripts/notify.ts pr "PR opened" "Source sync: home, rules" "https://github.com/.../pull/42"
@@ -35,8 +36,20 @@ const text = [
   .filter(Boolean)
   .join("\n");
 
+// Discord markdown differs from Slack's: **bold** and [label](url).
+const DISCORD_CONTENT_LIMIT = 2000;
+const content = [
+  `${emoji} **${title}**`,
+  message,
+  link ? `[View in GitHub](${link})` : "",
+]
+  .filter(Boolean)
+  .join("\n")
+  .slice(0, DISCORD_CONTENT_LIMIT);
+
 const payload = {
   text,
+  content,
   username: "90FM Trivia Watcher",
 };
 
