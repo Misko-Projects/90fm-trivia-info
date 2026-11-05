@@ -1,0 +1,30 @@
+name: Report a correction
+description: Something on 90fmtrivia.info is wrong, outdated, or contradicts the official site.
+title: "Correction: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for flagging this. 90fmtrivia.info is an unofficial companion site, and corrections from people who know the contest are how it stays accurate.
+  - type: input
+    id: page
+    attributes:
+      label: Which page?
+      description: The address of the page with the problem.
+      placeholder: https://90fmtrivia.info/archive/2019
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong?
+      description: Quote the part that is wrong and say what it should be.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: How do you know?
+      description: A link, a document, or firsthand knowledge. Optional, but it helps us fix things faster.
+    validations:
+      required: false
