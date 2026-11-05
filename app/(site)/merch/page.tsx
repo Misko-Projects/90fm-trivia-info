@@ -39,7 +39,7 @@ export default function MerchPage() {
   return (
     <>
       <PageHero
-        eyebrow={contest.title}
+        eyebrow={contest.theme ? contest.title : "90FM Trivia"}
         title="Merch"
         lede="Every shirt, sticker, and pint glass funds the radio station. Limited each year — pick up early."
       />
@@ -92,8 +92,18 @@ export default function MerchPage() {
           <p className="text-base leading-relaxed text-ink-soft">
             Merch is sold through the station — pick up in person at the studios
             or contact the coordinator for shipping. Designs change yearly with
-            the contest theme; current designs reflect{" "}
-            <strong className="text-ink">{contest.title}</strong>.
+            the contest theme.{" "}
+            {contest.theme ? (
+              <>
+                Current designs reflect{" "}
+                <strong className="text-ink">{contest.title}</strong>.
+              </>
+            ) : (
+              <>
+                The {contest.title} theme has not been announced yet, so what
+                is listed here is from the most recent contest.
+              </>
+            )}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a

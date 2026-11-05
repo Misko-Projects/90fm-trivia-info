@@ -3,7 +3,11 @@ import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
 import { Section } from "@/components/Section";
 import { OnAirBadge } from "@/components/OnAirBadge";
-import { getContact, getCurrentContest } from "@/lib/content";
+import {
+  getContact,
+  getContestDates,
+  getCurrentContest,
+} from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Listen",
@@ -14,6 +18,7 @@ export const metadata: Metadata = {
 export default function ListenPage() {
   const contact = getContact();
   const contest = getCurrentContest();
+  const dates = getContestDates();
 
   return (
     <>
@@ -60,8 +65,10 @@ export default function ListenPage() {
         <div className="rounded-[var(--radius-card)] border border-rule bg-paper p-6 shadow-paper sm:p-8">
           <p className="text-base text-ink-soft">
             Trivia {contest.number} runs continuously for 54 hours, from{" "}
-            <strong className="text-ink">Friday April 17 at 6:00 PM</strong>{" "}
-            through <strong className="text-ink">Sunday April 19</strong>.
+            <strong className="text-ink">
+              {dates.startDay} at {dates.startTime}
+            </strong>{" "}
+            through <strong className="text-ink">{dates.endDay}</strong>.
             Eight questions per hour.
           </p>
           <p className="mt-4 text-base text-ink-soft">

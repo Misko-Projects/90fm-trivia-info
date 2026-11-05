@@ -12,17 +12,20 @@ export type Contest = {
   number: number;
   title: string;
   shortTitle: string;
-  theme: string;
+  /** Omit until the official site announces it. Pages fall back to the
+   *  contest number. */
+  theme?: string;
   /** Local-time ISO datetime (Central Time) for the contest start. */
   startsAt: string;
   /** Local-time ISO datetime for the contest end. */
   endsAt: string;
-  /** Postmark deadline for mail-in registration. */
-  mailRegistrationPostmarkBy: string;
-  /** Date by which mail-in materials should arrive. */
-  mailRegistrationArriveBy: string;
-  /** Date that the New Trivia Times packet is shipped. */
-  packetShipsOn: string;
+  /** Postmark deadline for mail-in registration. Omit until announced; never
+   *  carry a previous contest's date forward or estimate one. */
+  mailRegistrationPostmarkBy?: string;
+  /** Date by which mail-in materials should arrive. Omit until announced. */
+  mailRegistrationArriveBy?: string;
+  /** Date that the New Trivia Times packet is shipped. Omit until announced. */
+  packetShipsOn?: string;
 };
 
 export type FutureContest = {
