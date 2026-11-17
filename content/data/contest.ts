@@ -21,6 +21,8 @@ export const currentContest: Contest = {
  *  filters that year out, so leave the entry here. */
 export const futureContests: FutureContest[] = [
   { year: 2027, dates: "April 9-11", number: 57 },
+  { year: 2028, dates: "April 7-9", number: 58 },
+  { year: 2029, dates: "April 13-15", number: 59 },
 ];
 
 export const inPersonRegistrationCost = 40;
